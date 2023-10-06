@@ -1,7 +1,13 @@
 import cx_Oracle
 
 # Conexión a la base de datos Oracle
-connection = cx_Oracle.connect("usuario/password@localhost/orcl")
+def establecer_conexion():
+    return mysql.connector.connect(
+        host="localhost",
+        user="root",
+        password="1234abcd",
+        database="Scott"
+    )
 
 # Funciones para agregar, actualizar y eliminar departamentos
 def add_depto(deptno, dname, loc):
