@@ -1,88 +1,170 @@
-import cx_Oracle
+import oracledb
 
-connection = cx_Oracle.connect("usuario/password@localhost/orcl")
+# Conexión a la base de datos Oracle
+connection = oracledb.connect("System/admin@localhost/xepdb1")
 
-# Funciones para agregar, actualizar y eliminar departamentos
-def add_depto(deptno, dname, loc):
-    cursor = connection.cursor()
+#Funcion para agregar departamentos add_deptno
+def addDepto(deptno, dname, loc):
     try:
-        cursor.callproc("Add_depto", [deptno, dname, loc])
+        cursor = connection.cursor()
+
+        cursor.callproc("add_depto", [deptno, dname, loc])
+
+        connection.commit()
         print("Departamento agregado con éxito")
-    except cx_Oracle.DatabaseError as e:
-        print("Error al agregar el departamento:", e)
+
     finally:
         cursor.close()
+        connection.close()
 
-def update_depto(deptno, dname, loc):
-    cursor = connection.cursor()
+#Funcion para actualizar departamento Update_depto()
+def updateDepto(deptno, dname, loc):
     try:
+        cursor = connection.cursor()
+
         cursor.callproc("Update_depto", [deptno, dname, loc])
+
+        connection.commit()
         print("Departamento actualizado con éxito")
-    except cx_Oracle.DatabaseError as e:
-        print("Error al actualizar el departamento:", e)
+
     finally:
         cursor.close()
+        connection.close()
 
-def delete_depto(deptno):
-    cursor = connection.cursor()
+#Funcion para eliminar departamento Delete_depto()
+def deleteDepto(deptno):
     try:
+        cursor = connection.cursor()
+
         cursor.callproc("Delete_depto", [deptno])
+
+        connection.commit()
         print("Departamento eliminado con éxito")
-    except cx_Oracle.DatabaseError as e:
-        print("Error al eliminar el departamento:", e)
+
     finally:
         cursor.close()
+        connection.close()
 
-# Función para obtener el número de empleados en un departamento
-def no_emp_depto(deptno):
-    cursor = connection.cursor()
+#Funcion para añadir empleado Add_emp()
+def addEmp(empno, ename, job, mgr, hiredate, sal, comm, deptno):
     try:
-        result = cursor.callfunc("noEmp_depto", cx_Oracle.NUMBER, [deptno])
-        print("Número de empleados en el departamento:", result)
-    except cx_Oracle.DatabaseError as e:
-        print("Error al obtener el número de empleados:", e)
-    finally:
-        cursor.close()
+        cursor = connection.cursor()
 
-# Función para agregar un empleado
-def add_emp(empno, ename, job, mgr, hiredate, sal, comm, deptno):
-    cursor = connection.cursor()
-    try:
         cursor.callproc("Add_emp", [empno, ename, job, mgr, hiredate, sal, comm, deptno])
+
+        connection.commit()
         print("Empleado agregado con éxito")
-    except cx_Oracle.DatabaseError as e:
-        print("Error al agregar el empleado:", e)
+
     finally:
         cursor.close()
+        connection.close()
 
-# Función para eliminar un empleado
-def delete_emp(empno):
-    cursor = connection.cursor()
+#Funcion para eliminar empleado Delete_emp()
+def deleteEmp(empno):
     try:
+        # Crear un cursor
+        cursor = connection.cursor()
+
+        # Llamar al procedimiento almacenado
         cursor.callproc("Delete_emp", [empno])
+
+        # Confirmar los cambios en la base de datos
+        connection.commit()
         print("Empleado eliminado con éxito")
-    except cx_Oracle.DatabaseError as e:
-        print("Error al eliminar el empleado:", e)
-    finally:
-        cursor.close()
 
-# Función para actualizar un empleado
-def update_emp(empno, ename, job, mgr, hiredate, sal, comm, deptno):
-    cursor = connection.cursor()
+    finally:
+        # Cerrar el cursor y la conexión
+        cursor.close()
+        connection.close()
+
+#Funcion para actualizar empleado Update_emp()
+def updateEmp(empno, ename, job, mgr, hiredate, sal, comm, deptno):
     try:
+        # Crear un cursor
+        cursor = connection.cursor()
+
+        # Llamar al procedimiento almacenado
         cursor.callproc("Update_emp", [empno, ename, job, mgr, hiredate, sal, comm, deptno])
+
+        # Confirmar los cambios en la base de datos
+        connection.commit()
         print("Empleado actualizado con éxito")
-    except cx_Oracle.DatabaseError as e:
-        print("Error al actualizar el empleado:", e)
+
     finally:
+        # Cerrar el cursor y la conexión
         cursor.close()
+        connection.close()
 
-# Ejemplo de uso
-if __name__ == "__main__":
-    add_depto(50, 'Ventas', 'Nueva York')
-    update_depto(50, 'Ventas Internacionales', 'Los Ángeles')
-    delete_depto(50)
-    no_emp_depto(10)
+#Funcion para obtener el numero de empleados por departamento noEmp_depto()
+def noEmpDepto(deptno):
+    try:
+        # Crear un cursor
+        cursor = connection.cursor()
 
-# Cerrar la conexión a la base de datos
-connection.close()
+        # Declarar una variable para almacenar el resultado
+        num_employees = cursor.var(oracledb.NUMBER)
+
+        # Llamar al procedimiento almacenado
+        cursor.callproc("Get_No_Emp_Depto", (deptno, num_employees))
+
+        # Recuperar el resultado del procedimiento
+        result = num_employees.getvalue()
+        print(f"Número de empleados en el departamento: {result}")
+
+    finally:
+        # Cerrar el cursor y la conexión
+        cursor.close()
+        connection.close()
+
+def main():
+    print("1.- Añadir el departamento")
+    print("2.- Actualizar el departamento")
+    print("3.- Eliminar un departamento")
+    print("4.- Añadir un empleado")
+    print("5.- Eliminar un empleo")
+    print("6.- Actualizar un empleado")
+    print("7.- Obtener el numero de empleados por departamento")
+
+    opcion = input("Ingrese el numero de opcion que desea hacer: ")
+
+    if (opcion == 1):
+        deptno = int(input("Ingrese el numero de departamento: "))
+        deptname = input("Ingrese el nombre del departamento: ")
+        loc = input("Ingrese la ubicacion del departamento: ")
+        addDepto(deptno, deptname, loc)
+    elif (opcion == 2):
+        deptno = int(input("Ingrese el numero de departamento: "))
+        deptname = input("Ingrese el nombre del departamento: ")
+        loc = input("Ingrese la ubicacion del departamento: ")
+        updateDepto(deptno, deptname, loc)
+    elif (opcion == 3):
+        deptno = int(input("Ingrese el numero de departamento: "))
+        deleteDepto(deptno)
+    elif (opcion == 4):
+        empno = int(input("Ingrese el numero de empleado"))
+        ename = input("Ingrese el nombre: ")
+        job = input("Ingrese el trabajo")
+        mgr = int(input("Ingese el mgr: "))
+        hiredate = input("Ingrese el hire_date: ")
+        sal = int(input("Ingrese sal: "))
+        comm = int(input("Ingrese el comm: "))
+        deptno = int(input("Ingrese el numero de departamento: "))
+        addEmp(empno, ename, job, mgr, hiredate, sal, comm, deptno)
+    elif (opcion == 5):
+        empno = int(input("Ingrese el numero de empleado"))
+        deleteEmp(empno)
+    elif (opcion == 6):
+        empno = int(input("Ingrese el numero de empleado"))
+        ename = input("Ingrese el nombre: ")
+        job = input("Ingrese el trabajo")
+        mgr = int(input("Ingese el mgr: "))
+        hiredate = input("Ingrese el hire_date: ")
+        sal = int(input("Ingrese sal: "))
+        comm = int(input("Ingrese el comm: "))
+        deptno = int(input("Ingrese el numero de departamento: "))
+        updateEmp(empno, ename, job, mgr, hiredate, sal, comm, deptno)
+    elif (opcion == 7):
+        deptno = int(input("Ingrese el numero de departamento: "))
+        noEmpDepto(deptno)
+
+main()
